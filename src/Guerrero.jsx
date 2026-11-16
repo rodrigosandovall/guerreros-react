@@ -7,6 +7,11 @@ const Guerrero = ({ nombre, poder, raza }) => {
     <article className="guerrero">
       <h2>{nombre}</h2>
       <p>Poder: {poderActual}</p>
+
+      {poderActual > 9000 && <p>🔥 ¡Es más de 9000!</p>}
+
+      {poderActual === 0 ? <p>😴 Agotado</p> : <p>💪 Listo para pelear</p>}
+
       <p>Raza: {raza}</p>
       <button onClick={() => setPoderActual(poderActual + 1000)}>
         Entrenar 💪
