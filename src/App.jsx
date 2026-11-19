@@ -1,18 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Guerrero from "./Guerrero";
 
-const guerreros = [
-  { id: 1, nombre: "Goku", poder: 9000, raza: "Saiyajin" },
-  { id: 2, nombre: "Vegeta", poder: 8500, raza: "Saiyajin" },
-  { id: 3, nombre: "Gohan", poder: 8000, raza: "Saiyajin" },
-];
-
 function App() {
+  const [guerreros, setGuerreros] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [nombre, setNombre] = useState("");
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const traerGuerreros = async () => {
+      try {
+        const respuesta = await fetch(
+          "https://dragonball-api.com/api/characters",
+        );
+        const datos = await respuesta.json();
+        setGuerreros(datos.items);
+      } catch (err) {
+        console.log(err);
+        setError("No se pudieron cargar los guerreros 😢");
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    traerGuerreros();
+  }, []);
   const guerrerosFiltrados = guerreros.filter((guerrero) =>
-    guerrero.nombre.toLowerCase().includes(busqueda.toLocaleLowerCase()),
+    guerrero.name.toLowerCase().includes(busqueda.toLocaleLowerCase()),
   );
   return (
     <main>
@@ -43,14 +58,20 @@ function App() {
         <p>Escribe tu nombre para inscribirte</p>
       )}
 
-      {guerrerosFiltrados.map((guerrero) => (
-        <Guerrero
-          key={guerrero.id}
-          nombre={guerrero.nombre}
-          poder={guerrero.poder}
-          raza={guerrero.raza}
-        />
-      ))}
+      {error && <p>{error}</p>}
+
+      {cargando ? (
+        <p>Cargando guerreros... ⏳</p>
+      ) : (
+        guerrerosFiltrados.map((guerrero) => (
+          <Guerrero
+            key={guerrero.id}
+            nombre={guerrero.name}
+            poder={Number(guerrero.ki.replaceAll(".", ""))}
+            raza={guerrero.race}
+          />
+        ))
+      )}
     </main>
   );
 }
